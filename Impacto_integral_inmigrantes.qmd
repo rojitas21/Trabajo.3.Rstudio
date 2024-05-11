@@ -1,0 +1,122 @@
+---
+title: "Impacto integral de inmigrantes"
+author: "Javiera Rojas"
+format: html
+editor: visual
+bibliography: Percepcion_inmigrantes.bib
+link-citations: true 
+---
+
+## Percepción y Actitudes de la Población Chilena hacia la Migración: Un Análisis de Variables Multidimensionales
+
+El fenómeno de la migración ha cobrado una creciente relevancia en Chile en las últimas décadas, generando debates y discusiones en torno a su impacto en la sociedad. La diversidad social a nivel socio-cultural, politica y economicamente llega afectar a una sociedad determinada, sobre todo genera complicaciones y conflictos sociales a la hora de interactuar e intregrarse socialmente, ya sea a nivel individual, intersubjetivo o social; estos comportamientos afectarían directamente a la cohesión y/o segregación social. Analizar la manera de pensar de la población chilena respecto a una sociedad diversa y multicultural, incluyendo posibles prejuicios o estereotipos.
+
+Este estudio se propone a explorar las percepciones y actitudes de la población chilena hacía la migración, utilizando los datos abtraidos de la base de datos "Latinobarometro, cuestionario 2023", la cual maneja e investiga el desarrollo de la democracia, la economía y la sociedad en su conjunto, por medio de un estudio de opinión pública que aplica anualmente alrededor de 18 países de América Latina representando a más de 600 millones de habitantes; producen y publican los resultados, permitiendo ser utilizados en estudios como este. Para este estudio utilizamos diversas dimensiones para lograr explorar las distintas formas de pensar y grado de acuerdo respecto una sociedad mas diversa, afectado por la llegada de inmigrantes al país; entre ellos contamos con: Grado de acuerdo: Los inmigrantes son buenos para la economia del país, Grado de acuerdo: Inmigrantes causan un aumento del crimen, Grado de acuerdo: Los inmigrantes mejoran nuestra sociedad con ideas y cultura, finalmente la manera de pensar sobre una sociedad mas diversa o una que mantenga una defensa en sus tradicicones y costumbres. Para fines de esta ivestigación se trabajó con una base de datos recodificada, incorporando estas variables y fltrada a caso chileno.
+
+```{r}
+# 0.Ajustes iniciales:
+rm(list=ls())
+options(scipen=999)
+```
+
+```{r}
+# PAQUETES
+
+library(pacman)
+pacman::p_load(haven,
+               sjlabelled,
+               dplyr, #Manipulacion de datos
+               stargazer, #Tablas
+               sjmisc, # Tablas
+               summarytools, # Tablas
+               kableExtra, #Tablas
+               sjPlot, #Tablas y gráficos
+               corrplot, # Correlaciones
+               sessioninfo, # Información de la sesión de trabajo
+               ggplot2,  # Para la mayoría de los gráficos
+               mice)   #Para imputar NA's
+
+
+
+```
+
+```{r}
+#2.Carga de base:
+load(file = "Input/proc_data.RData")
+```
+
+```{r}
+#3.Descriptivos:
+summarytools::dfSummary(proc_data, plain.ascii = FALSE)
+view(dfSummary(proc_data, headings=FALSE)) %>%
+    kable(.,"markdown")
+```
+
+La tabla nos muestra como en general parece haber una tendencia hacía actitudes positivas o neutrales hacía la inmigración en diferentes aspectos evaluados, como la llegada de inmigrantes, teniendo en claro que esta puede perjudicar o beneficiar a la sociedad; el aporte de ideas y cultura, seguido por la forma de pensar respecto a que esta sea mas diversa, y su impacto económico. Sin embargo, la percepción en relación con el crimen parece ser más variada.
+
+```{r}
+#3.1 Gráficos:
+frq(proc_data$inmi_ideycul)
+ggplot(proc_data, aes(x = inmi_ideycul)) +
+  geom_bar(fill = "pink") + 
+  labs (title = "Interculturalidad")
+
+frq(proc_data$inmi_crim)
+ggplot(proc_data, aes(x = inmi_crim)) +
+  geom_bar(fill = "pink") + 
+  labs (title = "Aumento inmigración-crimen")
+
+frq(proc_data$inmi_eco)
+ggplot(proc_data, aes(x = inmi_eco)) +
+  geom_bar(fill = "pink") + 
+  labs (title = "Impacto económico de los inmigrantes")
+```
+
+Si observamos el grafico "Interculturalidad" nos entrega informacion respecto al grado de acuerdo de la poblacion Chilena al considerar que los inmigrantes han logrado mejorar nuestra sociedad con ideas y cutura; más de 350 personas están de acuerdo, sin embargo, cerca de 400 personas mantienen su desacuerdo. Se interpreta una fuerte opinion a la idea de que la sociedad Chilena defiende sus costumbres.
+
+Si bien el grafico "Aumento inmigracion-crimen", referida a que han aumentado la delincuencia en las calles. Si bien tiene dos de sus barras muy cercanas, observamos que mas de 500 personas estarian de acuerdo en que gracias al fenomeno de la migración, se ha visualizado un aumento en el crimen. Muy pocas personas, menos de 100, estarian en contra de esto.
+
+Por ultimo, si analizamos brevemente el ultimo grafico "impacto economico de los inmigrantes", entendiendo este impacto a partir de si los inmigrantes son buenos para la economia del país. La mayoria de la sociedad Chilena estaría en desacuerdo con este postulado. Se podría deber a dististos factores que llegan a afectar la manera de pensar, socialmente el pensamiendo de "nos vienen a robar el trabajo" está normalizado.
+
+```{r}
+#4.Correlación:
+cor_proc_data <- cor(proc_data,
+                     use = "complete.obs")
+cor_proc_data
+
+corrplot.mixed(cor_proc_data)
+
+```
+
+Hay correlaciones calculadas entre "soc_diversa" referida a la manera de pensar que tiene la poblacion Chilena respecto a una sociedad la cual defienda sus costumbres o una que éste abierta a la diveridad de todo tipo de costumbres, e "inmi_ideycul" entendida como aportacion positiva de inmigrantes a la sociedad en idea y cultura, esta es de -0.35559423, lo que sugiere una correlación negativa moderada. Esto significa que hay una asociación inversa entre la percepción de la diversidad social y la percepción de la interculturalidad.
+Hay una correlación positiva moderada entre "inmi_llega" : llegada de inmigrantes perjudica o beneficia, e "inmi_eco": imigrantes aportan positivamete ala economia del país, es de (0.13751819), lo que sugiere que una percepción positiva de la llegada de inmigrantes tiende a estar asociada con una percepción positiva del impacto económico de la inmigración.
+
+```{r}
+#5.Confiabilidad del conjunto:
+## Alpha de Cronbach:
+psych::alpha(proc_data, check.keys = TRUE)
+
+##Alpha de Cronbach recodificado:
+psych::alpha(dplyr::select(proc_data, inmi_ideycul, inmi_crim, inmi_eco),check.keys = TRUE)
+
+```
+
+Este análisis indica que la consistencia entre las variables "inmi_ideycul". "inmi_crim", "inmi_eco" es aceptable y logran explicar la con mayor fiabilidad la percepción y actitudes de la población chilena respecto al fenomeno de migración, esta es de 0.73.
+
+```{r}
+#CONSTRUCCION DE ESCALA:
+
+proc_data <- proc_data %>% 
+  rowwise() %>% 
+  mutate(percepcion_impacto_integral_inmigrantes = sum(inmi_ideycul, inmi_crim, inmi_eco))
+summary(proc_data$percepcion_impacto_integral_inmigrantes)
+
+
+ggplot(proc_data, aes(x = percepcion_impacto_integral_inmigrantes)) +
+  geom_histogram(binwidth = 0.6, colour = "black", fill = "yellow") +  
+  theme_bw() +
+  xlab("Percepcion del impacto integral de inmigrantes") +
+  ylab("Frecuencia")
+```
+
+Esta escala ofrece una visión general de como está distribuida la "Percepcion del impacto integral de inmigrantes", si bien tiene variabilidad en los extremos de la distribuicion, esta tiene centralidad alrededor de 7 en una escala de 3 a 12.

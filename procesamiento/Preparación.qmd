@@ -1,0 +1,204 @@
+---
+title: ""Diversidad social (cohesion y segregracion)"
+author: "Javiera Rojas"
+format: html
+editor: visual
+---
+
+Para esta segunda entrega se espera que sean capaces de generar una tabla de correlaciones que muestre el grado de asociación de las variables utilizadas en la investigación
+
+También se espera que sean capaces de elaborar al menos un índice ponderado y/o una escalados con su respectivo reporte de consistencia interna (alfa de cronbach) según corresponda.
+
+El objetivo de este trabajo 3 es que sean capaces de operacionalizar variables, estimar y visualizar su grado de asociación y construir índices y/o escalas.
+
+#### Ajustes iniciales
+
+```{r}
+rm(list=ls())
+options(scipen=999)
+```
+
+#### Paquetes a utilizar
+
+```{r}
+pacman::p_load(tidyverse, #Conjunto de paquetes, sobre todo dplyr y ggplot2
+               car, #Para recodificar
+               haven,
+               dplyr,
+               summarytools, #Para descriptivos
+               sjmisc,
+               psych,     # para Alfa de Chronbach
+               sjlabelled,
+               stargazer, #Tablas
+               kableExtra, #Tablas
+               sjPlot, #Tablas y gráficos
+               corrplot, # Correlaciones
+               sessioninfo, # Información de la sesión de trabajo
+               ggplot2) # Para la mayoría de los gráficos
+
+library(pacman)
+```
+
+#### Base de datos
+
+```{r}
+load("C:/Users/Javi/Desktop/Trabajo 3.R/input/Latinobarometro_2023_Esp_Rdata_v1_0.rdata")
+
+names(Latinobarometro_2023_Esp_v1_0)
+dim(Latinobarometro_2023_Esp_v1_0)
+```
+
+#### Selección de variables
+
+```{r}
+
+find_var(data = find_var(data = Latinobarometro_2023_Esp_v1_0,"idenpa"),"idenpa")
+
+#Base con variables a utilizar
+
+proc_data <- select(Latinobarometro_2023_Esp_v1_0, idenpa, P19N, P32INN, P33N.D, P33N.C, P33N.A)
+
+proc_data <- Latinobarometro_2023_Esp_v1_0 %>% select(idenpa, #país
+  
+                                           P19N, #manera de pensar respecto a una sociedad diversa
+                                           
+                                           P32INN, #manera de pensar respecto a llegada de inmigrantes 
+                                
+                                           P33N.D, #grado de acuerdo: inmigrantes mejoran nuestra sociedad con ideas y cultura
+                                           
+                                           P33N.C, #grado de acuerdo: inmigrantes aumentan el crimen         
+      
+                                           P33N.A) #grado de acuerdo: inmigrantes son buenos para la economia del país
+                      
+                                           
+#Comprobar
+names(proc_data)  
+summary(proc_data)
+sjlabelled::get_label(proc_data)
+
+#Removemos base anterior
+remove(Latinobarometro_2023_Esp_v1_0)
+```
+
+```{r}
+#Filtrar para usar solo los datos de Chile
+
+proc_data <- proc_data %>% dplyr::filter(idenpa==152)
+```
+
+#### Procesamiento de variables
+
+```{r}
+#Drescriptivo Basico
+frq(proc_data$indepa) #sin NA
+frq(proc_data$P19N)
+frq(proc_data$P33N.D)
+frq(proc_data$P33N.C)
+frq(proc_data$P33N.A)
+frq(proc_data$P32INN)
+
+#Reodificación: eliminar casos perdidos
+proc_data <- proc_data %>% set_na(., na = -5)
+
+proc_data$P19N <- recode(proc_data$P19N, "1=0; 2=1")
+proc_data$P33N.D <- recode(proc_data$P33N.D, "1=0; 2=1; 3=2; 4=3")
+proc_data$P33N.C <- recode(proc_data$P33N.C, "1=0; 2=1; 3=2; 4=3")
+proc_data$P33N.A <- recode(proc_data$P33N.A, "1=0; 2=1; 3=2; 4=3")
+proc_data$P32INN <- recode(proc_data$P32INN, "1=0; 2=1; 3=2; 4=3")
+
+#Etiquetar
+##Nombre
+proc_data <- proc_data %>% rename("soc_diversa"=P19N, 
+                                  "inmi_ideycul"=P33N.D, 
+                                  "inmi_crim"=P33N.C, 
+                                  "inmi_eco"=P33N.A,
+                                  "inmi_llega"=P32INN)
+names(proc_data)
+
+##Etiqueta
+proc_data$Socdiversidad  <- set_label(x = proc_data$soc_diversa, label = "Prefiero una sociedas más...")
+get_label(proc_data$Socdiversidad)
+
+proc_data$Ideaycultura  <- set_label(x = proc_data$inmi_ideycul, label = "Inmigantes mejoran nuestra sociedad")
+get_label(proc_data$Ideaycultura)
+
+proc_data$Crimen  <- set_label(x = proc_data$inmi_crim, label = "inmigrantes causan un aunmento del crimen")
+get_label(proc_data$Crimen)
+
+proc_data$Economia  <- set_label(x = proc_data$inmi_eco, label = "inmigrantes afectan  a la economia del país")
+get_label(proc_data$Economia)
+
+proc_data$Integracion  <- set_label(x = proc_data$inmi_llega, label = "Llegada de inmigrantes, beneficia o perjudica")
+get_label(proc_data$Integración)
+
+
+
+proc_data$soc_diversa <- set_labels(proc_data$soc_diversa,
+            labels=c( "Prefiero una socieda que defienda nuestras costumbres"=0,
+                      "Prefiero una sociedad queesté abierta a ladiversidad de todotipo de costumbres"=1))
+
+proc_data$inmi_ideycul <- set_labels(proc_data$inmi_ideycul,
+            labels=c( "Muy de acuerdo"=0,
+                      "De acuerdo"=1,
+                      "En desacuerdo"=2,
+                      "Muy en desacuerdo"=3))
+
+proc_data$inmi_crim <- set_labels(proc_data$inmi_crim,
+            labels=c( "Muy de acuerdo"=0,
+                      "De acuerdo"=1,
+                      "En desacuerdo"=2,
+                      "Muy en desacuerdo"=3))
+
+proc_data$inmi_eco <- set_labels(proc_data$inmi_eco,
+            labels=c( "Muy de acuerdo"=0,
+                      "De acuerdo"=1,
+                      "En desacuerdo"=2,
+                      "Muy en desacuerdo"=3))
+
+proc_data$inmi_llega <- set_labels(proc_data$inmi_llega,
+            labels=c( "Muy de acuerdo"=0,
+                      "De acuerdo"=1,
+                      "En desacuerdo"=2,
+                      "Muy en desacuerdo"=3))
+
+proc_data$Integración <- set_labels(proc_data$,
+            labels=c( "Muy de acuerdo"=0,
+                      "De acuerdo"=1,
+                      "En desacuerdo"=2,
+                      "Muy en desacuerdo"=3))
+```
+
+#### Base de datos procesada
+
+```{r}
+proc_data <-as.data.frame(proc_data)
+stargazer(proc_data, type="text")
+
+#Guardar
+save(proc_data,file = "proc/proc_data")
+
+```
+
+#### Análisis descriptivo
+
+```{r}
+# Descripcion de variables:
+
+#| label: tbl-sjmisc 
+#| #| tbl-cap:"Percepcion de migrantes en Chile"
+
+
+summarytools::dfSummary(proc_data, plain.ascii = FALSE)
+view(dfSummary(proc_data, headings=FALSE)) %>%
+  kable(., "markdown")
+
+```
+
+#### Graficos univariados
+
+```{r}
+graf_Integracíon <- ggplot(PROC_DATA, aes(x = Ingresos)) +
+  geom_bar(fill = "coral") + 
+  labs (title = "Ingresos totales")
+
+```
