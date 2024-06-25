@@ -1,0 +1,45 @@
+---
+title: "Impacto itegral de inmigrantes en Chile"
+author: "Javiera Rojas"
+format: revealjs
+editor: visual
+---
+
+# Percepción y Actitudes de la Población Chilena hacia la Migración:
+
+La inclusión/diversidad social a nivel socio-cultural, político y económico llega afectar a una sociedad determinada, genera complicaciones a la hora de interactuar e intregrarse socialmente. Estos comportamientos influyen directamente a la cohesión y/o segregación social.
+
+## Un analisis de variables multidimensionales: Objetivo
+
+Analizar la perspectiva de la población Chilena respecto a una sociedad diversa y multicultural, incluyendo posibles prejuicios o estereotipos, apartir del fenomeno de la migración.
+
+- P19N, #manera de pensar respecto a una sociedad diversa: defienda costumbres o abierta a diversidad
+
+- P32INN, #manera de pensar respecto a llegada de inmigrantes: Beneficia o perjudica
+
+## Un analisis de variables multidimensionales: Objetivo
+
+- P33N.D, #grado de acuerdo: inmigrantes mejoran nuestra sociedad con ideas y cultura
+
+- P33N.C, #grado de acuerdo: inmigrantes aumentan el crimen
+
+- P33N.A) #grado de acuerdo: inmigrantes son buenos para la economia del país
+
+## Un analisis de variables multidimensionales: Objetivo
+
+Utilizando los datos abtraidos de la base de datos "Latinobarometro, cuestionario 2023", la cual maneja e investiga el desarrollo de la democracia, la economía y la sociedad en su conjunto, por medio de un estudio de opinión pública que aplica anualmente alrededor de 18 países de América Latina representando a más de 600 millones de habitantes; producen y publican los resultados, permitiendo ser utilizados en estudios como este.
+
+# Graficos:
+## Grafico Aumento migración-crimen
+![](output/graf_inmi_crim.png)
+
+## Grafico percepción de llegada de inmigrantes:
+![](output/graf_inmi_llega.png)
+
+# Análisis e interacción:
+## Correlación:
+Hay correlaciones calculadas entre la manera de pensar que tiene la poblacion Chilena respecto a una sociedad la cual defienda sus costumbres o una que éste abierta a la diveridad de todo tipo de costumbres, junto a la aportacion positiva de inmigrantes a la sociedad en idea y cultura, esta es de -0.35559423, lo que sugiere una correlación negativa moderada. Esto significa que hay una asociación inversa entre la percepción de la diversidad social y la percepción de la interculturalidad. 
+
+## Construccion escala: Percepcion impacto integral de inmigrantes
+Esta escala ofrece una visión general de como está distribuida la "Percepcion del impacto integral de inmigrantes", si bien tiene variabilidad en los extremos de la distribuicion, esta tiene centralidad alrededor de 7 en una escala de 3 a 12.
+
