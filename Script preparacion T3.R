@@ -7,6 +7,7 @@ options(scipen=999) #Desactivar notacion cientifica (los e10,e15,etc)
 setwd("C:/Users/Javi/Desktop/Trabajo.3.Rstudio")
 
 # 1.Paquetes:
+
 install.packages("pacman")
 pacman::p_load(haven,
                sjlabelled,
@@ -23,7 +24,7 @@ pacman::p_load(haven,
 
 #2. Cargamos base de datos:
 
-load("C:/Users/Javi/Desktop/Trabajo.3.Rstudio/input/Latinobarometro_2023_Esp_Rdata_v1_0.rdata")
+load("C:/Users/Javi/Desktop/Trabajo.3.Rstudio/input/Latinobarometro_2023_Esp_Rdata_v1_0r.rdata")
 
 names(Latinobarometro_2023_Esp_v1_0)
 dim(Latinobarometro_2023_Esp_v1_0)
@@ -75,6 +76,21 @@ proc_data <- proc_data %>% rename("soc_diversa"=P19N,
                                   "inmi_llega"=P32INN)
 sjlabelled::get_label(proc_data)
 
+#Recodificacion
+
+proc_data$soc_diversa <- factor(proc_data$soc_diversa,
+                                labels = c("Sociedad defiende costumbres", "Sociedad abierta a diversidad"),
+                                levels = c(1, 2))
+
+proc_data$inmi_ideycul <- factor(proc_data$inmi_ideycul,
+                                labels = c("Muy de acuerdo", "De acuerdo", "En desacuerdo", "Muy en desacuerdo"),
+                                levels = c(1, 2, 3, 4))
+
+proc_data$inmi_eco <- factor(proc_data$inmi_eco,
+                                labels = c("Muy de acuerdo", "De acuerdo", "En desacuerdo", "Muy en desacuerdo"),
+                                levels = c(1, 2, 3, 4))
+
+
 #Removemos base anterior
 remove(Latinobarometro_2023_Esp_v1_0)
 
@@ -98,6 +114,7 @@ summarytools::dfSummary(proc_data, plain.ascii = FALSE)
 view(dfSummary(proc_data, headings=FALSE))
 
 # 4.1 Gráficos
+
 graf_soc_diversa <- ggplot(proc_data, aes(x = soc_diversa)) +
   geom_bar(fill = "pink") + 
   labs (title = "Percepción de la diversidad social")
@@ -158,8 +175,10 @@ proc_data <- proc_data %>%
 summary(proc_data$percepcion_impacto_integral_inmigrantes)
 
 
-ggplot(proc_data, aes(x = percepcion_impacto_integral_inmigrantes)) +
+graf_esc <- ggplot(proc_data, aes(x = percepcion_impacto_integral_inmigrantes)) +
   geom_histogram(binwidth = 0.6, colour = "black", fill = "yellow") +  
   theme_bw() +
   xlab("Percepcion del impacto integral de inmigrantes") +
   ylab("Frecuencia")
+
+ggsave(graf_esc, file = "output/graf_esc.png")
